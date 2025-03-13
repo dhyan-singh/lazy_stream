@@ -29,16 +29,10 @@ class Stream[T](ABC):
         # let's just consume here
         l = []
         n = self
-        while True:
-            match type(n).__name__:
-                case "Cons":
-                    l.append(n.head()())
-                case "Empty":
-                    return l
-                case _:
-                    raise Exception("There are supposed to be only two types? How did I reach here??")
+        while isinstance(n, Cons):
+            l.append(n.head()())
             n = n.tail()()
-            
+        return l
 
         # print(self.head()())
         # print(self.tail()().head()())
@@ -74,6 +68,6 @@ def lazy():
     yield 5
 
 if __name__ == "__main__":
-    Cons[int](lambda: 5, lambda: Empty[int]())
+    # Cons[int](lambda: 5, lambda: Empty[int]())
     print(Stream[int].of(5, 7, 3, 4).toList())
     # Stream[int].of()
