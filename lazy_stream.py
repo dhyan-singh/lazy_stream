@@ -3,6 +3,7 @@ from typing import Callable, Generic
 from abc import ABC, abstractmethod
 from itertools import islice
 
+
 class Stream[T](ABC):
     @abstractmethod
     def head(self) -> T:
@@ -26,6 +27,9 @@ class Stream[T](ABC):
         return Cons(hd, tl)
 
     def toList(self) -> list[T]:
+        """
+        Converts a `Stream` to a `list`
+        """
         # let's just consume here
         l = []
         n = self
@@ -33,41 +37,50 @@ class Stream[T](ABC):
             l.append(n.head()())
             n = n.tail()()
         return l
-
-        # print(self.head()())
-        # print(self.tail()().head()())
-        # print(self.tail()().tail()().tail().head()())
+    
+    def empty():
+        return Empty[T]() 
+    
+    def take(self, n: int) -> "Stream[T]":
+        def go(xs, n):
+            if xs.is_empty(): return Stream.empty()
+            else:
+                if n == 0: return Stream.empty()
+                else: return Stream.cons(xs.head(), lambda: go(xs.tail()(), n-1))
+        return go(self, n)
 
 
 class Empty[T](Stream[T]):
     def head(self) -> T:
         raise Exception("Empty Stream")
-    
+
     def tail(self) -> "Stream[T]":
         raise Exception("Empty Stream")
-    
+
     def is_empty(self) -> bool:
         return True
 
+
 @dataclass
 class Cons[T](Stream[T]):
+    """
+    A non-empty stream (node?)"""
+
     def __init__(self, head: Callable[[], T], tail: Callable[[], Stream[T]]):
         self._head = head
         self._tail = tail
 
     def head(self) -> T:
         return self._head
-    
+
     def tail(self) -> "Stream[T]":
         return self._tail
-    
+
     def is_empty(self) -> bool:
         return False
 
-def lazy():
-    yield 5
 
 if __name__ == "__main__":
     # Cons[int](lambda: 5, lambda: Empty[int]())
-    print(Stream[int].of(5, 7, 3, 4).toList())
+    print(Stream[int].of(5, 7, 3, 4).take(2).toList())
     # Stream[int].of()
